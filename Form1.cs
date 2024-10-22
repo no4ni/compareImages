@@ -188,12 +188,19 @@ namespace compareImages
                             if (File.Exists(newname)) try
                                 {
                                     File.Delete(newname);
-                                    ReverseAdjustmentLanc1(originalBytes, adjustedBytes).Save(newname);
                                 }
-                                catch { al = "Some"; };
-                            stopWatch.Stop();
-                            TimeSpan ts = stopWatch.Elapsed;
-                            textBox4.Text += newname + " done in " + String.Format("{0:0.000} ", ts.TotalSeconds) + "seconds\r\n";
+                                catch { 
+                                    al = "Some";
+                                };
+                            try { 
+                                ReverseAdjustmentLanc1(originalBytes, adjustedBytes).Save(newname);
+                                stopWatch.Stop();
+                                TimeSpan ts = stopWatch.Elapsed;
+                                textBox4.Text += newname + " done in " + String.Format("{0:0.000} ", ts.TotalSeconds) + "seconds\r\n";
+                            } catch {
+                                textBox4.Text += newname + " Error\r\n";
+                            }
+                            
                             Application.DoEvents();
                         }
                     }

@@ -96,7 +96,7 @@
             button3.Name = "button3";
             button3.Size = new Size(786, 32);
             button3.TabIndex = 5;
-            button3.Text = "Compare";
+            button3.Text = "Compare by MAE";
             button3.UseVisualStyleBackColor = true;
             button3.Click += button3_Click;
             // 
