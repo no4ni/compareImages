@@ -56,6 +56,8 @@ namespace compareImages
                             byte[,,] comparedBytes = RGBfromBMP(compared);
                             float MAErgb8 = compareMAErgb8(originalBytes, comparedBytes);
                             textBox2.Text += filename + " = " + (1 - MAErgb8).ToString() + "\r\n";
+                            textBox4.SelectionStart = textBox4.Text.Length;
+                            textBox4.ScrollToCaret();
                             Application.DoEvents();
                         }
                     }
@@ -197,6 +199,8 @@ namespace compareImages
                                 stopWatch.Stop();
                                 TimeSpan ts = stopWatch.Elapsed;
                                 textBox4.Text += newname + " done in " + String.Format("{0:0.000} ", ts.TotalSeconds) + "seconds\r\n";
+                                textBox4.SelectionStart = textBox4.Text.Length;
+                                textBox4.ScrollToCaret();
                             } catch {
                                 textBox4.Text += newname + " Error\r\n";
                             }
@@ -258,6 +262,11 @@ namespace compareImages
                     {
                         add[x, y, 0] = originalBytes[x, y, 0];
                     }
+                    else if (rmax == rmin)
+                    {
+                        mpf[x, y, 0] = 1;
+                        add[x, y, 0] = originalBytes[x, y, 0] - miniAdj[x, y, 0];
+                    }
                     else if (rmax * originalBytes[x, y, 0] / (float)miniAdj[x, y, 0] > 255)
                     {
                         float t1x = (float)(miniAdj[x, y, 0] - rmin) / (rmax - rmin);
@@ -274,6 +283,11 @@ namespace compareImages
                     {
                         add[x, y, 1] = originalBytes[x, y, 1];
                     }
+                    else if (gmax == gmin)
+                    {
+                        mpf[x, y, 1] = 1;
+                        add[x, y, 1] = originalBytes[x, y, 1] - miniAdj[x, y, 1];
+                    }
                     else if (gmax * originalBytes[x, y, 1] / (float)miniAdj[x, y, 1] > 255)
                     {
                         float t1x = (float)(miniAdj[x, y, 1] - gmin) / (gmax - gmin);
@@ -289,6 +303,11 @@ namespace compareImages
                     if (miniAdj[x, y, 2] == 0)
                     {
                         add[x, y, 2] = originalBytes[x, y, 2];
+                    }
+                    else if (bmax == bmin)
+                    {
+                        mpf[x, y, 2] = 1;
+                        add[x, y, 2] = originalBytes[x, y, 2] - miniAdj[x, y, 2];
                     }
                     else if (bmax * originalBytes[x, y, 2] / (float)miniAdj[x, y, 2] > 255)
                     {
