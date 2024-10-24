@@ -38,12 +38,13 @@
             button1 = new Button();
             pictureBox1 = new PictureBox();
             tabPage2 = new TabPage();
-            textBox4 = new TextBox();
+            button7 = new Button();
             button6 = new Button();
             textBox3 = new TextBox();
             button5 = new Button();
             button4 = new Button();
             pictureBox2 = new PictureBox();
+            textBox4 = new TextBox();
             tabControl1.SuspendLayout();
             tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
@@ -144,6 +145,7 @@
             // tabPage2
             // 
             tabPage2.Controls.Add(textBox4);
+            tabPage2.Controls.Add(button7);
             tabPage2.Controls.Add(button6);
             tabPage2.Controls.Add(textBox3);
             tabPage2.Controls.Add(button5);
@@ -157,15 +159,17 @@
             tabPage2.Text = "Reverse Adjustment";
             tabPage2.UseVisualStyleBackColor = true;
             // 
-            // textBox4
+            // button7
             // 
-            textBox4.Dock = DockStyle.Fill;
-            textBox4.Location = new Point(3, 280);
-            textBox4.Multiline = true;
-            textBox4.Name = "textBox4";
-            textBox4.ScrollBars = ScrollBars.Both;
-            textBox4.Size = new Size(786, 139);
-            textBox4.TabIndex = 16;
+            button7.Dock = DockStyle.Top;
+            button7.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            button7.Location = new Point(3, 280);
+            button7.Name = "button7";
+            button7.Size = new Size(786, 34);
+            button7.TabIndex = 17;
+            button7.Text = "Adjust by raMagLanc1";
+            button7.UseVisualStyleBackColor = true;
+            button7.Click += button7_Click;
             // 
             // button6
             // 
@@ -220,6 +224,16 @@
             pictureBox2.TabIndex = 11;
             pictureBox2.TabStop = false;
             // 
+            // textBox4
+            // 
+            textBox4.Dock = DockStyle.Fill;
+            textBox4.Location = new Point(3, 314);
+            textBox4.Multiline = true;
+            textBox4.Name = "textBox4";
+            textBox4.ScrollBars = ScrollBars.Both;
+            textBox4.Size = new Size(786, 105);
+            textBox4.TabIndex = 18;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -255,7 +269,8 @@
         private TextBox textBox3;
         private Button button5;
         private Button button4;
-        private TextBox textBox4;
         private Button button6;
+        private Button button7;
+        private TextBox textBox4;
     }
 }

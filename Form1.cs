@@ -170,18 +170,21 @@ namespace compareImages
             {
                 string al = "All";
                 byte[,,] originalBytes = RGBfromBMP(pictureBox2.Image);
-                int w = pictureBox2.Image.Width;
-                float aspect = (float)pictureBox2.Image.Width / pictureBox2.Image.Height;
+                int wo = pictureBox2.Image.Width;
+                int ho = pictureBox2.Image.Height;
+                float aspect = (float)wo / ho;
                 string[] allfiles = Directory.GetFiles(textBox3.Text);
                 Stopwatch allS = new();
                 allS.Start();
                 foreach (string filename in allfiles)
                 {
                     string ext = filename[^4..];
-                    if ((ext == ".png" || ext == ".jpg" || ext == ".gif" || ext == "jpeg" || ext == ".bmp" || ext == ".ico") && filename[^12..] != "AdjLanc1.png")
+                    if ((ext == ".png" || ext == ".jpg" || ext == ".gif" || ext == "jpeg" || ext == ".bmp" || ext == ".ico") && filename[^9..] != "Lanc1.png")
                     {
                         Image adjusted = Image.FromFile(filename);
-                        if (aspect == (float)adjusted.Width / adjusted.Height && w < adjusted.Width)
+                        int w = adjusted.Width;
+                        int h = adjusted.Height;
+                        if (aspect == (float)w / h && wo < w)
                         {
                             Stopwatch stopWatch = new();
                             stopWatch.Start();
@@ -191,20 +194,24 @@ namespace compareImages
                                 {
                                     File.Delete(newname);
                                 }
-                                catch { 
+                                catch
+                                {
                                     al = "Some";
                                 };
-                            try { 
-                                ReverseAdjustmentLanc1(originalBytes, adjustedBytes).Save(newname);
+                            try
+                            {
+                                ReverseAdjustmentLanc1(originalBytes, adjustedBytes, w, h, wo, ho).Save(newname);
                                 stopWatch.Stop();
                                 TimeSpan ts = stopWatch.Elapsed;
                                 textBox4.Text += newname + " done in " + String.Format("{0:0.000} ", ts.TotalSeconds) + "seconds\r\n";
                                 textBox4.SelectionStart = textBox4.Text.Length;
                                 textBox4.ScrollToCaret();
-                            } catch {
+                            }
+                            catch
+                            {
                                 textBox4.Text += newname + " Error\r\n";
                             }
-                            
+
                             Application.DoEvents();
                         }
                     }
@@ -215,15 +222,31 @@ namespace compareImages
             }
         }
 
-        private static Bitmap ReverseAdjustmentLanc1(byte[,,] originalBytes, byte[,,] adjustedBytes)
+        private static Bitmap ReverseAdjustmentLanc1(byte[,,] originalBytes, byte[,,] adjustedBytes, int w, int h, int wo, int ho)
         {
-            int w = adjustedBytes.GetLength(0);
-            int h = adjustedBytes.GetLength(1);
-            int wo = originalBytes.GetLength(0);
-            int ho = originalBytes.GetLength(1);
             float decrease = (float)w / wo;
 
-            byte[,,] miniAdj = ExactMean(adjustedBytes, w, h, wo, ho, decrease);
+            (float[,,] mpf, float[,,] add) = AdjustCalc(originalBytes, ExactMean(adjustedBytes, w, h, wo, ho, decrease), adjustedBytes, decrease, w, h, wo, ho);
+
+            return BMPfromRGB(DoAdjust(adjustedBytes, scaleLanczos1(mpf, wo, ho, decrease), scaleLanczos1(add, wo, ho, decrease), w, h), w, h);
+        }
+
+        private static byte[,,] DoAdjust(byte[,,] adjustedBytes, float[,,] lancMPs, float[,,] lancAds, int w, int h)
+        {
+            Parallel.For(0, h, y =>
+            {
+                for (int x = 0; x < w; x++)
+                {
+                    adjustedBytes[x, y, 0] = (byte)Math.Clamp(adjustedBytes[x, y, 0] * lancMPs[x, y, 0] + lancAds[x, y, 0] + 0.5f, 0, 255);
+                    adjustedBytes[x, y, 1] = (byte)Math.Clamp(adjustedBytes[x, y, 1] * lancMPs[x, y, 1] + lancAds[x, y, 1] + 0.5f, 0, 255);
+                    adjustedBytes[x, y, 2] = (byte)Math.Clamp(adjustedBytes[x, y, 2] * lancMPs[x, y, 2] + lancAds[x, y, 2] + 0.5f, 0, 255);
+                }
+            });
+            return adjustedBytes;
+        }
+
+        private static (float[,,] mpf, float[,,] add) AdjustCalc(byte[,,] originalBytes, byte[,,] miniAdj, byte[,,] adjustedBytes, float decrease, int w, int h, int wo, int ho)
+        {
             float[,,] mpf = new float[wo, ho, 3];
             float[,,] add = new float[wo, ho, 3];
 
@@ -323,20 +346,7 @@ namespace compareImages
                 }
             });
 
-            float[,,] lancMPs = scaleLanczos1(mpf, wo, ho, decrease);
-            float[,,] lancAds = scaleLanczos1(add, wo, ho, decrease);
-
-            Parallel.For(0, h, y =>
-            {
-                for (int x = 0; x < w; x++)
-                {
-                    adjustedBytes[x, y, 0] = (byte)Math.Clamp(adjustedBytes[x, y, 0] * lancMPs[x, y, 0] + lancAds[x, y, 0] + 0.5f, 0, 255);
-                    adjustedBytes[x, y, 1] = (byte)Math.Clamp(adjustedBytes[x, y, 1] * lancMPs[x, y, 1] + lancAds[x, y, 1] + 0.5f, 0, 255);
-                    adjustedBytes[x, y, 2] = (byte)Math.Clamp(adjustedBytes[x, y, 2] * lancMPs[x, y, 2] + lancAds[x, y, 2] + 0.5f, 0, 255);
-                }
-            });
-
-            return BMPfromRGB(adjustedBytes, w, h);
+            return (mpf, add);
         }
 
         private static float[,,] scaleLanczos1(float[,,] RGB, int wo, int ho, float scale)
@@ -353,7 +363,7 @@ namespace compareImages
                 int yy = (int)(y / scale);
                 for (int x = -scaleHalf; x < w - scaleHalf; x++)
                 {
-                    int xc = x + scaleHalf; 
+                    int xc = x + scaleHalf;
                     int xx = (int)(x / scale);
                     float suml = 0;
                     float sumr = 0;
@@ -391,6 +401,7 @@ namespace compareImages
         private static float Lanczos1(float v)
         {
             if (v == 0) return 1;
+            else if (v >= 1 || v <= -1) return 0;
             else
             {
                 float px = MathF.PI * v;
@@ -458,5 +469,128 @@ namespace compareImages
             return bmp;
         }
 
+        private void button7_Click(object sender, EventArgs e)
+        {
+            if (pictureBox2.Image == null)
+            {
+                MessageBox.Show("Select original Image!");
+            }
+            else if (textBox3.Text == "")
+            {
+                MessageBox.Show("Select Folder to adjust!");
+            }
+            else
+            {
+                string al = "All";
+                byte[,,] originalBytes = RGBfromBMP(pictureBox2.Image);
+                int wo = pictureBox2.Image.Width;
+                int ho = pictureBox2.Image.Height;
+                float aspect = (float)wo / ho;
+                string[] allfiles = Directory.GetFiles(textBox3.Text);
+                Stopwatch allS = new();
+                allS.Start();
+                foreach (string filename in allfiles)
+                {
+                    string ext = filename[^4..];
+                    if ((ext == ".png" || ext == ".jpg" || ext == ".gif" || ext == "jpeg" || ext == ".bmp" || ext == ".ico") && filename[^9..] != "Lanc1.png")
+                    {
+                        Image adjusted = Image.FromFile(filename);
+                        int w = adjusted.Width;
+                        int h = adjusted.Height;
+                        if (aspect == (float)w / h && wo < w)
+                        {
+                            Stopwatch stopWatch = new();
+                            stopWatch.Start();
+                            byte[,,] adjustedBytes = RGBfromBMP(adjusted);
+                            string newname = filename[..^4] + "AdjMagLanc1.png";
+                            if (File.Exists(newname)) try
+                                {
+                                    File.Delete(newname);
+                                }
+                                catch
+                                {
+                                    al = "Some";
+                                };
+                            try
+                            {
+                                ReverseAdjustmentMagLanc1(originalBytes, adjustedBytes, w, h, wo, ho).Save(newname);
+                                stopWatch.Stop();
+                                TimeSpan ts = stopWatch.Elapsed;
+                                textBox4.Text += newname + " done in " + String.Format("{0:0.000} ", ts.TotalSeconds) + "seconds\r\n";
+                                textBox4.SelectionStart = textBox4.Text.Length;
+                                textBox4.ScrollToCaret();
+                            }
+                            catch
+                            {
+                                textBox4.Text += newname + " Error\r\n";
+                            }
+
+                            Application.DoEvents();
+                        }
+                    }
+                }
+                allS.Stop();
+                TimeSpan allTs = allS.Elapsed;
+                MessageBox.Show(al + " images in Folder with bigger size and same aspect ratio have been adjusted to original Image in " + String.Format("{0:0.000} ", allTs.TotalSeconds) + "seconds!");
+            }
+        }
+
+        private static Bitmap ReverseAdjustmentMagLanc1(byte[,,] originalBytes, byte[,,] adjustedBytes, int w, int h, int wo, int ho)
+        {
+            float decrease = (float)w / wo;
+
+            (float[,,] mpf, float[,,] add) = AdjustCalc(originalBytes, ExactMean(adjustedBytes, w, h, wo, ho, decrease), adjustedBytes, decrease, w, h, wo, ho);
+
+            return BMPfromRGB(DoAdjust(adjustedBytes, scaleMagLanczos1(mpf, wo, ho, decrease), scaleMagLanczos1(add, wo, ho, decrease), w, h), w, h);
+        }
+
+        private static float[,,] scaleMagLanczos1(float[,,] RGB, int wo, int ho, float scale)
+        {
+            int h = (int)(ho * scale);
+            float w = wo * scale;
+            float[,,] lnc = new float[(int)w, h, 3];
+            int scaleHalf = (int)(scale / 2 + 0.5f);
+
+            Parallel.For(-scaleHalf, h - scaleHalf, y =>
+            {
+                int yc = y + scaleHalf;
+                float l;
+                int yy = (int)(y / scale);
+                for (int x = -scaleHalf; x < w - scaleHalf; x++)
+                {
+                    int xc = x + scaleHalf;
+                    int xx = (int)(x / scale);
+                    float suml = 0;
+                    float sumr = 0;
+                    float sumg = 0;
+                    float sumb = 0;
+                    for (int xf = -1; xf <= 1; xf++)
+                    {
+                        int xxx = xx + xf;
+                        if (xxx >= 0 && xxx < wo)
+                        {
+                            for (int yf = -1; yf <= 1; yf++)
+                            {
+                                int yyy = yy + yf;
+                                if (yyy >= 0 && yyy < ho)
+                                {
+                                    l = Lanczos1(MathF.Sqrt(MathF.Pow(xxx * scale - x,2f) + MathF.Pow(yyy * scale - y,2f)) / scale);
+                                    suml += l;
+                                    sumr += l * RGB[xxx, yyy, 0];
+                                    sumg += l * RGB[xxx, yyy, 1];
+                                    sumb += l * RGB[xxx, yyy, 2];
+                                }
+                            }
+                        }
+                    }
+
+                    lnc[xc, yc, 0] = sumr / suml;
+                    lnc[xc, yc, 1] = sumg / suml;
+                    lnc[xc, yc, 2] = sumb / suml;
+                }
+            });
+
+            return lnc;
+        }
     }
 }
