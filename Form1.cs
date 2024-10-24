@@ -355,16 +355,17 @@ namespace compareImages
             float w = wo * scale;
             float[,,] lnc = new float[(int)w, h, 3];
             int scaleHalf = (int)(scale / 2 + 0.5f);
+            float ascale = 1f / scale;
 
             Parallel.For(-scaleHalf, h - scaleHalf, y =>
             {
                 int yc = y + scaleHalf;
                 float l;
-                int yy = (int)(y / scale);
+                int yy = (int)(y * ascale);
                 for (int x = -scaleHalf; x < w - scaleHalf; x++)
                 {
                     int xc = x + scaleHalf;
-                    int xx = (int)(x / scale);
+                    int xx = (int)(x * ascale);
                     float suml = 0;
                     float sumr = 0;
                     float sumg = 0;
@@ -379,7 +380,7 @@ namespace compareImages
                                 int yyy = yy + yf;
                                 if (yyy >= 0 && yyy < ho)
                                 {
-                                    l = Lanczos1((xxx * scale - x) / scale) * Lanczos1((yyy * scale - y) / scale);
+                                    l = Lanczos1((xxx * scale - x) * ascale) * Lanczos1((yyy * scale - y) * ascale);
                                     suml += l;
                                     sumr += l * RGB[xxx, yyy, 0];
                                     sumg += l * RGB[xxx, yyy, 1];
@@ -412,7 +413,7 @@ namespace compareImages
         private static byte[,,] ExactMean(byte[,,] colorBytes, int w, int h, int wo, int ho, float decrease)
         {
             int decreaseI = (int)(decrease + 0.5f);
-            int decrease2 = decreaseI * decreaseI;
+            float decrease2 = 1f/(decreaseI * decreaseI);
             byte[,,] miniPic = new byte[wo, ho, 3];
 
             Parallel.For(0, ho, y =>
@@ -437,9 +438,9 @@ namespace compareImages
                             blue += colorBytes[xx, yy, 2];
                         }
                     }
-                    miniPic[x, y, 0] = (byte)(red / decrease2 + 0.5f);
-                    miniPic[x, y, 1] = (byte)(green / decrease2 + 0.5f);
-                    miniPic[x, y, 2] = (byte)(blue / decrease2 + 0.5f);
+                    miniPic[x, y, 0] = (byte)(red * decrease2 + 0.5f);
+                    miniPic[x, y, 1] = (byte)(green * decrease2 + 0.5f);
+                    miniPic[x, y, 2] = (byte)(blue * decrease2 + 0.5f);
                 }
             });
 
@@ -550,16 +551,17 @@ namespace compareImages
             float w = wo * scale;
             float[,,] lnc = new float[(int)w, h, 3];
             int scaleHalf = (int)(scale / 2 + 0.5f);
+            float ascale = 1f / scale;
 
             Parallel.For(-scaleHalf, h - scaleHalf, y =>
             {
                 int yc = y + scaleHalf;
                 float l;
-                int yy = (int)(y / scale);
+                int yy = (int)(y * ascale);
                 for (int x = -scaleHalf; x < w - scaleHalf; x++)
                 {
                     int xc = x + scaleHalf;
-                    int xx = (int)(x / scale);
+                    int xx = (int)(x * ascale);
                     float suml = 0;
                     float sumr = 0;
                     float sumg = 0;
@@ -574,7 +576,7 @@ namespace compareImages
                                 int yyy = yy + yf;
                                 if (yyy >= 0 && yyy < ho)
                                 {
-                                    l = Lanczos1(MathF.Sqrt(MathF.Pow(xxx * scale - x,2f) + MathF.Pow(yyy * scale - y,2f)) / scale);
+                                    l = Lanczos1(MathF.Sqrt(MathF.Pow(xxx * scale - x, 2f) + MathF.Pow(yyy * scale - y, 2f)) * ascale);
                                     suml += l;
                                     sumr += l * RGB[xxx, yyy, 0];
                                     sumg += l * RGB[xxx, yyy, 1];
