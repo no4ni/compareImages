@@ -56,7 +56,7 @@ namespace compareImages
                             byte[,,] comparedBytes = RGBfromBMP(compared);
                             float MAErgb8 = compareMAErgb8(originalBytes, comparedBytes);
                             textBox2.Text += filename + " = " + (1 - MAErgb8).ToString() + "\r\n";
-                            textBox2.SelectionStart = textBox4.Text.Length;
+                            textBox2.SelectionStart = textBox2.Text.Length;
                             textBox2.ScrollToCaret();
                             Application.DoEvents();
                         }
