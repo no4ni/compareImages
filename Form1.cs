@@ -10,6 +10,11 @@ namespace compareImages
             InitializeComponent();
         }
 
+        string[] historyCMP = new string[10];
+        int indexHistoryCMP = 9;
+        string[] historyADJ = new string[10];
+        int indexHistoryADJ = 9;
+
         private void button1_Click(object sender, EventArgs e)
         {
             using OpenFileDialog openFileDialog = new(); //open raster image from DialodWindow
@@ -17,6 +22,14 @@ namespace compareImages
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 pictureBox1.Image = Image.FromFile(@openFileDialog.FileName);
+                for (int i = 1; i < 10; i++)
+                {
+                    historyCMP[i - 1] = historyCMP[i];
+                }
+                historyCMP[9] = @openFileDialog.FileName;
+                indexHistoryCMP = 9;
+                if (historyCMP[8] != null) button9.Visible = true;
+                button8.Visible = false;
             }
         }
 
@@ -144,6 +157,14 @@ namespace compareImages
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 pictureBox2.Image = Image.FromFile(@openFileDialog.FileName);
+                for (int i = 1; i < 10; i++)
+                {
+                    historyADJ[i - 1] = historyADJ[i];
+                }
+                historyADJ[9] = @openFileDialog.FileName;
+                indexHistoryADJ = 9;
+                if (historyADJ[8] != null) button10.Visible = true;
+                button11.Visible = false;
             }
         }
 
@@ -179,7 +200,7 @@ namespace compareImages
                 foreach (string filename in allfiles)
                 {
                     string ext = filename[^4..];
-                    if ((ext == ".png" || ext == ".jpg" || ext == ".gif" || ext == "jpeg" || ext == ".bmp" || ext == ".ico") && filename[^9..] != "Lanc1.png")
+                    if ((ext == ".png" || ext == ".jpg" || ext == ".gif" || ext == "jpeg" || ext == ".bmp" || ext == ".ico") && !(filename.Contains("Adj") && filename.Contains("Lanc")))
                     {
                         Image adjusted = Image.FromFile(filename);
                         int w = adjusted.Width;
@@ -380,7 +401,7 @@ namespace compareImages
                                 int yyy = yy + yf;
                                 if (yyy >= 0 && yyy < ho)
                                 {
-                                    l = Lanczos1((xxx * scale - x) * ascale) * Lanczos1((yyy * scale - y) * ascale);
+                                    l = Lanczos1(xxx - x * ascale) * Lanczos1(yyy - y * ascale);
                                     suml += l;
                                     sumr += l * RGB[xxx, yyy, 0];
                                     sumg += l * RGB[xxx, yyy, 1];
@@ -399,6 +420,67 @@ namespace compareImages
             return lnc;
         }
 
+        private static float[,,] scaleLanczos250(float[,,] RGB, int wo, int ho, float scale)
+        {
+            int h = (int)(ho * scale);
+            float w = wo * scale;
+            float[,,] lnc = new float[(int)w, h, 3];
+            int scaleHalf = (int)(scale / 2 + 0.5f);
+            float ascale = 1f / scale;
+
+            Parallel.For(-scaleHalf, h - scaleHalf, y =>
+            {
+                int yc = y + scaleHalf;
+                float l;
+                int yy = (int)(y * ascale);
+                for (int x = -scaleHalf; x < w - scaleHalf; x++)
+                {
+                    int xc = x + scaleHalf;
+                    int xx = (int)(x * ascale);
+                    float suml = 0;
+                    float sumr = 0;
+                    float sumg = 0;
+                    float sumb = 0;
+                    for (int xf = -3; xf <= 3; xf++)
+                    {
+                        int xxx = xx + xf;
+                        if (xxx >= 0 && xxx < wo)
+                        {
+                            for (int yf = -3; yf <= 3; yf++)
+                            {
+                                int yyy = yy + yf;
+                                if (yyy >= 0 && yyy < ho)
+                                {
+                                    l = Lanczos250(xxx - x * ascale) * Lanczos250(yyy - y * ascale);
+                                    suml += l;
+                                    sumr += l * RGB[xxx, yyy, 0];
+                                    sumg += l * RGB[xxx, yyy, 1];
+                                    sumb += l * RGB[xxx, yyy, 2];
+                                }
+                            }
+                        }
+                    }
+
+                    lnc[xc, yc, 0] = sumr / suml;
+                    lnc[xc, yc, 1] = sumg / suml;
+                    lnc[xc, yc, 2] = sumb / suml;
+                }
+            });
+
+            return lnc;
+        }
+
+        private static float Lanczos250(float v)
+        {
+            if (v == 0) return 1;
+            else if (v >= 2.5f || v <= -2.5f) return 0;//
+            else
+            {
+                float px = MathF.PI * v;
+                return 2.5f * MathF.Sin(px) * MathF.Sin(px / 2.5f) / px / px;
+            }
+        }
+
         private static float Lanczos1(float v)
         {
             if (v == 0) return 1;
@@ -413,7 +495,7 @@ namespace compareImages
         private static byte[,,] ExactMean(byte[,,] colorBytes, int w, int h, int wo, int ho, float decrease)
         {
             int decreaseI = (int)(decrease + 0.5f);
-            float decrease2 = 1f/(decreaseI * decreaseI);
+            float decrease2 = 1f / (decreaseI * decreaseI);
             byte[,,] miniPic = new byte[wo, ho, 3];
 
             Parallel.For(0, ho, y =>
@@ -493,7 +575,7 @@ namespace compareImages
                 foreach (string filename in allfiles)
                 {
                     string ext = filename[^4..];
-                    if ((ext == ".png" || ext == ".jpg" || ext == ".gif" || ext == "jpeg" || ext == ".bmp" || ext == ".ico") && filename[^9..] != "Lanc1.png")
+                    if ((ext == ".png" || ext == ".jpg" || ext == ".gif" || ext == "jpeg" || ext == ".bmp" || ext == ".ico") && !(filename.Contains("Adj") && filename.Contains("Lanc")))
                     {
                         Image adjusted = Image.FromFile(filename);
                         int w = adjusted.Width;
@@ -593,6 +675,133 @@ namespace compareImages
             });
 
             return lnc;
+        }
+
+        private void button9_Click(object sender, EventArgs e)
+        {
+            if (indexHistoryCMP > 0) indexHistoryCMP--;
+            pictureBox1.Image = Image.FromFile(historyCMP[indexHistoryCMP]);
+            button8.Visible = true;
+            if (indexHistoryCMP > 0)
+            {
+                if (historyCMP[indexHistoryCMP - 1] == null) button9.Visible = false;
+            }
+            else
+            {
+                button9.Visible = false;
+            }
+        }
+
+        private void button8_Click(object sender, EventArgs e)
+        {
+            if (indexHistoryCMP < 9) indexHistoryCMP++;
+            pictureBox1.Image = Image.FromFile(historyCMP[indexHistoryCMP]);
+            button9.Visible = true;
+            if (indexHistoryCMP > 8)
+            {
+                button8.Visible = false;
+            }
+        }
+
+        private void button10_Click(object sender, EventArgs e)
+        {
+            if (indexHistoryADJ > 0) indexHistoryADJ--;
+            pictureBox2.Image = Image.FromFile(historyADJ[indexHistoryADJ]);
+            button11.Visible = true;
+            if (indexHistoryADJ > 0)
+            {
+                if (historyADJ[indexHistoryADJ - 1] == null) button10.Visible = false;
+            }
+            else
+            {
+                button10.Visible = false;
+            }
+        }
+
+        private void button11_Click(object sender, EventArgs e)
+        {
+            if (indexHistoryADJ < 9) indexHistoryADJ++;
+            pictureBox2.Image = Image.FromFile(historyADJ[indexHistoryADJ]);
+            button10.Visible = true;
+            if (indexHistoryADJ > 8)
+            {
+                button11.Visible = false;
+            }
+        }
+
+        private void button12_Click(object sender, EventArgs e)//2.5
+        {
+            if (pictureBox2.Image == null)
+            {
+                MessageBox.Show("Select original Image!");
+            }
+            else if (textBox3.Text == "")
+            {
+                MessageBox.Show("Select Folder to adjust!");
+            }
+            else
+            {
+                string al = "All";
+                byte[,,] originalBytes = RGBfromBMP(pictureBox2.Image);
+                int wo = pictureBox2.Image.Width;
+                int ho = pictureBox2.Image.Height;
+                float aspect = (float)wo / ho;
+                string[] allfiles = Directory.GetFiles(textBox3.Text);
+                Stopwatch allS = new();
+                allS.Start();
+                foreach (string filename in allfiles)
+                {
+                    string ext = filename[^4..];
+                    if ((ext == ".png" || ext == ".jpg" || ext == ".gif" || ext == "jpeg" || ext == ".bmp" || ext == ".ico") && !(filename.Contains("Adj") && filename.Contains("Lanc")))
+                    {
+                        Image adjusted = Image.FromFile(filename);
+                        int w = adjusted.Width;
+                        int h = adjusted.Height;
+                        if (aspect == (float)w / h && wo < w)
+                        {
+                            Stopwatch stopWatch = new();
+                            stopWatch.Start();
+                            byte[,,] adjustedBytes = RGBfromBMP(adjusted);
+                            string newname = filename[..^4] + "AdjLanc250.png";
+                            if (File.Exists(newname)) try
+                                {
+                                    File.Delete(newname);
+                                }
+                                catch
+                                {
+                                    al = "Some";
+                                };
+                            try
+                            {
+                                ReverseAdjustmentLanc250(originalBytes, adjustedBytes, w, h, wo, ho).Save(newname);
+                                stopWatch.Stop();
+                                TimeSpan ts = stopWatch.Elapsed;
+                                textBox4.Text += newname + " done in " + String.Format("{0:0.000} ", ts.TotalSeconds) + "seconds\r\n";
+                                textBox4.SelectionStart = textBox4.Text.Length;
+                                textBox4.ScrollToCaret();
+                            }
+                            catch
+                            {
+                                textBox4.Text += newname + " Error\r\n";
+                            }
+
+                            Application.DoEvents();
+                        }
+                    }
+                }
+                allS.Stop();
+                TimeSpan allTs = allS.Elapsed;
+                MessageBox.Show(al + " images in Folder with bigger size and same aspect ratio have been adjusted to original Image in " + String.Format("{0:0.000} ", allTs.TotalSeconds) + "seconds!");
+            }
+        }
+
+        private static Bitmap ReverseAdjustmentLanc250(byte[,,] originalBytes, byte[,,] adjustedBytes, int w, int h, int wo, int ho)
+        {
+            float decrease = (float)w / wo;
+
+            (float[,,] mpf, float[,,] add) = AdjustCalc(originalBytes, ExactMean(adjustedBytes, w, h, wo, ho, decrease), adjustedBytes, decrease, w, h, wo, ho);
+
+            return BMPfromRGB(DoAdjust(adjustedBytes, scaleLanczos250(mpf, wo, ho, decrease), scaleLanczos250(add, wo, ho, decrease), w, h), w, h);
         }
     }
 }

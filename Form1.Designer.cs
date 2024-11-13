@@ -31,6 +31,8 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             tabControl1 = new TabControl();
             tabPage1 = new TabPage();
+            button9 = new Button();
+            button8 = new Button();
             textBox2 = new TextBox();
             button3 = new Button();
             textBox1 = new TextBox();
@@ -38,13 +40,16 @@
             button1 = new Button();
             pictureBox1 = new PictureBox();
             tabPage2 = new TabPage();
-            textBox4 = new TextBox();
+            button12 = new Button();
+            button10 = new Button();
+            button11 = new Button();
             button7 = new Button();
             button6 = new Button();
             textBox3 = new TextBox();
             button5 = new Button();
             button4 = new Button();
             pictureBox2 = new PictureBox();
+            textBox4 = new TextBox();
             tabControl1.SuspendLayout();
             tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
@@ -65,6 +70,8 @@
             // 
             // tabPage1
             // 
+            tabPage1.Controls.Add(button9);
+            tabPage1.Controls.Add(button8);
             tabPage1.Controls.Add(textBox2);
             tabPage1.Controls.Add(button3);
             tabPage1.Controls.Add(textBox1);
@@ -78,6 +85,34 @@
             tabPage1.TabIndex = 0;
             tabPage1.Text = "Compare";
             tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // button9
+            // 
+            button9.Font = new Font("Segoe UI", 12F);
+            button9.Location = new Point(0, 0);
+            button9.Name = "button9";
+            button9.Size = new Size(33, 34);
+            button9.TabIndex = 8;
+            button9.TabStop = false;
+            button9.Text = "⯇";
+            button9.TextAlign = ContentAlignment.TopCenter;
+            button9.UseVisualStyleBackColor = true;
+            button9.Visible = false;
+            button9.Click += button9_Click;
+            // 
+            // button8
+            // 
+            button8.Font = new Font("Segoe UI", 12F);
+            button8.Location = new Point(31, 0);
+            button8.Name = "button8";
+            button8.Size = new Size(33, 34);
+            button8.TabIndex = 7;
+            button8.TabStop = false;
+            button8.Text = "⯈";
+            button8.TextAlign = ContentAlignment.TopCenter;
+            button8.UseVisualStyleBackColor = true;
+            button8.Visible = false;
+            button8.Click += button8_Click;
             // 
             // textBox2
             // 
@@ -145,6 +180,9 @@
             // tabPage2
             // 
             tabPage2.Controls.Add(textBox4);
+            tabPage2.Controls.Add(button12);
+            tabPage2.Controls.Add(button10);
+            tabPage2.Controls.Add(button11);
             tabPage2.Controls.Add(button7);
             tabPage2.Controls.Add(button6);
             tabPage2.Controls.Add(textBox3);
@@ -159,15 +197,45 @@
             tabPage2.Text = "Reverse Adjustment";
             tabPage2.UseVisualStyleBackColor = true;
             // 
-            // textBox4
+            // button12
             // 
-            textBox4.Dock = DockStyle.Fill;
-            textBox4.Location = new Point(3, 314);
-            textBox4.Multiline = true;
-            textBox4.Name = "textBox4";
-            textBox4.ScrollBars = ScrollBars.Both;
-            textBox4.Size = new Size(786, 105);
-            textBox4.TabIndex = 18;
+            button12.Dock = DockStyle.Top;
+            button12.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            button12.Location = new Point(3, 314);
+            button12.Name = "button12";
+            button12.Size = new Size(786, 34);
+            button12.TabIndex = 21;
+            button12.Text = "Adjust by raLanc2.5 - another 130% slower and 0.1255% more accurate";
+            button12.UseVisualStyleBackColor = true;
+            button12.Click += button12_Click;
+            // 
+            // button10
+            // 
+            button10.Font = new Font("Segoe UI", 12F);
+            button10.Location = new Point(0, 0);
+            button10.Name = "button10";
+            button10.Size = new Size(33, 34);
+            button10.TabIndex = 20;
+            button10.TabStop = false;
+            button10.Text = "⯇";
+            button10.TextAlign = ContentAlignment.TopCenter;
+            button10.UseVisualStyleBackColor = true;
+            button10.Visible = false;
+            button10.Click += button10_Click;
+            // 
+            // button11
+            // 
+            button11.Font = new Font("Segoe UI", 12F);
+            button11.Location = new Point(31, 0);
+            button11.Name = "button11";
+            button11.Size = new Size(33, 34);
+            button11.TabIndex = 19;
+            button11.TabStop = false;
+            button11.Text = "⯈";
+            button11.TextAlign = ContentAlignment.TopCenter;
+            button11.UseVisualStyleBackColor = true;
+            button11.Visible = false;
+            button11.Click += button11_Click;
             // 
             // button7
             // 
@@ -177,7 +245,7 @@
             button7.Name = "button7";
             button7.Size = new Size(786, 34);
             button7.TabIndex = 17;
-            button7.Text = "Adjust by raMagLanc1 - 17% slower, 0.004% more accurate";
+            button7.Text = "Adjust by raMagLanc1 - 27% slower, 0.004% more accurate";
             button7.UseVisualStyleBackColor = true;
             button7.Click += button7_Click;
             // 
@@ -234,6 +302,16 @@
             pictureBox2.TabIndex = 11;
             pictureBox2.TabStop = false;
             // 
+            // textBox4
+            // 
+            textBox4.Dock = DockStyle.Fill;
+            textBox4.Location = new Point(3, 348);
+            textBox4.Multiline = true;
+            textBox4.Name = "textBox4";
+            textBox4.ScrollBars = ScrollBars.Both;
+            textBox4.Size = new Size(786, 71);
+            textBox4.TabIndex = 22;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -271,6 +349,11 @@
         private Button button4;
         private Button button6;
         private Button button7;
+        private Button button9;
+        private Button button8;
+        private Button button10;
+        private Button button11;
+        private Button button12;
         private TextBox textBox4;
     }
 }
