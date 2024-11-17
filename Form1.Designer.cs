@@ -40,6 +40,7 @@
             button1 = new Button();
             pictureBox1 = new PictureBox();
             tabPage2 = new TabPage();
+            textBox4 = new TextBox();
             button12 = new Button();
             button10 = new Button();
             button11 = new Button();
@@ -49,7 +50,6 @@
             button5 = new Button();
             button4 = new Button();
             pictureBox2 = new PictureBox();
-            textBox4 = new TextBox();
             tabControl1.SuspendLayout();
             tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
@@ -197,6 +197,16 @@
             tabPage2.Text = "Reverse Adjustment";
             tabPage2.UseVisualStyleBackColor = true;
             // 
+            // textBox4
+            // 
+            textBox4.Dock = DockStyle.Fill;
+            textBox4.Location = new Point(3, 348);
+            textBox4.Multiline = true;
+            textBox4.Name = "textBox4";
+            textBox4.ScrollBars = ScrollBars.Both;
+            textBox4.Size = new Size(786, 71);
+            textBox4.TabIndex = 22;
+            // 
             // button12
             // 
             button12.Dock = DockStyle.Top;
@@ -205,7 +215,7 @@
             button12.Name = "button12";
             button12.Size = new Size(786, 34);
             button12.TabIndex = 21;
-            button12.Text = "Adjust by raLanc2.5 - another 130% slower and 0.1255% more accurate";
+            button12.Text = "Adjust by raLanc2.5 - another 130% slower and smoother, -0.1849% accurate, but can be 0.1255% more accurate in some cases";
             button12.UseVisualStyleBackColor = true;
             button12.Click += button12_Click;
             // 
@@ -301,16 +311,6 @@
             pictureBox2.SizeMode = PictureBoxSizeMode.Zoom;
             pictureBox2.TabIndex = 11;
             pictureBox2.TabStop = false;
-            // 
-            // textBox4
-            // 
-            textBox4.Dock = DockStyle.Fill;
-            textBox4.Location = new Point(3, 348);
-            textBox4.Multiline = true;
-            textBox4.Name = "textBox4";
-            textBox4.ScrollBars = ScrollBars.Both;
-            textBox4.Size = new Size(786, 71);
-            textBox4.TabIndex = 22;
             // 
             // Form1
             // 
