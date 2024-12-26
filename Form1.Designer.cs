@@ -213,9 +213,11 @@
             button12.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             button12.Location = new Point(3, 314);
             button12.Name = "button12";
+            button12.Padding = new Padding(50, 0, 0, 0);
             button12.Size = new Size(786, 34);
             button12.TabIndex = 21;
-            button12.Text = "Adjust by raLanc2.5 - another 130% slower and smoother, -0.1849% accurate, but can be 0.1255% more accurate in some cases";
+            button12.Text = "Adjust by raLanc2.5: another 130% slower and -0.1841% accurate, but smoother and can be 0.1255% more accurate in some cases";
+            button12.TextAlign = ContentAlignment.MiddleLeft;
             button12.UseVisualStyleBackColor = true;
             button12.Click += button12_Click;
             // 
@@ -253,9 +255,11 @@
             button7.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             button7.Location = new Point(3, 280);
             button7.Name = "button7";
+            button7.Padding = new Padding(50, 0, 0, 0);
             button7.Size = new Size(786, 34);
             button7.TabIndex = 17;
-            button7.Text = "Adjust by raMagLanc1 - 27% slower, 0.004% more accurate";
+            button7.Text = "Adjust by raMagLanc1: 27% slower, 0.004% more accurate";
+            button7.TextAlign = ContentAlignment.MiddleLeft;
             button7.UseVisualStyleBackColor = true;
             button7.Click += button7_Click;
             // 
@@ -265,9 +269,11 @@
             button6.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             button6.Location = new Point(3, 246);
             button6.Name = "button6";
+            button6.Padding = new Padding(50, 0, 0, 0);
             button6.Size = new Size(786, 34);
             button6.TabIndex = 15;
             button6.Text = "Adjust by raLanc1";
+            button6.TextAlign = ContentAlignment.MiddleLeft;
             button6.UseVisualStyleBackColor = true;
             button6.Click += button4_Click;
             // 

@@ -61,17 +61,19 @@ namespace compareImages
                 foreach (string filename in allfiles)
                 {
                     string ext = filename[^4..];
-                    if (ext == ".png" || ext == ".jpg" || ext == ".gif" || ext == "jpeg" || ext == ".bmp" || ext == ".ico")
+                    if (ext.ToLower() == ".png" || ext.ToLower() == ".jpg" || ext.ToLower() == ".gif" || ext.ToLower() == "jpeg" || ext.ToLower() == ".bmp" || ext.ToLower() == ".ico")
                     {
-                        Image compared = Image.FromFile(filename);
-                        if (pictureBox1.Image.Width == compared.Width && pictureBox1.Image.Height == compared.Height)
+                        using (Image compared = Image.FromFile(filename))
                         {
-                            byte[,,] comparedBytes = RGBfromBMP(compared);
-                            float MAErgb8 = compareMAErgb8(originalBytes, comparedBytes);
-                            textBox2.Text += filename + " = " + (1 - MAErgb8).ToString() + "\r\n";
-                            textBox2.SelectionStart = textBox2.Text.Length;
-                            textBox2.ScrollToCaret();
-                            Application.DoEvents();
+                            if (pictureBox1.Image.Width == compared.Width && pictureBox1.Image.Height == compared.Height)
+                            {
+                                byte[,,] comparedBytes = RGBfromBMP(compared);
+                                float MAErgb8 = compareMAErgb8(originalBytes, comparedBytes);
+                                textBox2.Text += filename + " = " + (1 - MAErgb8).ToString() + "\r\n";
+                                textBox2.SelectionStart = textBox2.Text.Length;
+                                textBox2.ScrollToCaret();
+                                Application.DoEvents();
+                            }
                         }
                     }
                 }
