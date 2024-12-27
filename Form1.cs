@@ -531,6 +531,43 @@ namespace compareImages
             return miniPic;
         }
 
+        private static float[,,] ExactMeanFloat(byte[,,] colorBytes, int w, int h, int wo, int ho, float decrease)
+        {
+            int decreaseI = (int)(decrease + 0.5f);
+            float decrease2 = 1f / (decreaseI * decreaseI);
+            float[,,] miniPic = new float[wo, ho, 3];
+
+            Parallel.For(0, ho, y =>
+            {
+                int ys = (int)(y * decrease + 0.5f);
+                while (ys + decreaseI > h) ys--;
+                for (int x = 0; x < wo; x++)
+                {
+                    int xs = (int)(x * decrease + 0.5f);
+                    while (xs + decreaseI > w) xs--;
+                    int red = 0;
+                    int green = 0;
+                    int blue = 0;
+                    for (int fx = 0; fx < decreaseI; fx++)
+                    {
+                        int xx = xs + fx;
+                        for (int fy = 0; fy < decreaseI; fy++)
+                        {
+                            int yy = ys + fy;
+                            red += colorBytes[xx, yy, 0];
+                            green += colorBytes[xx, yy, 1];
+                            blue += colorBytes[xx, yy, 2];
+                        }
+                    }
+                    miniPic[x, y, 0] = red * decrease2;
+                    miniPic[x, y, 1] = green * decrease2;
+                    miniPic[x, y, 2] = blue * decrease2;
+                }
+            });
+
+            return miniPic;
+        }
+
         static Bitmap BMPfromRGB(byte[,,] sr, int w, int h)
         {
             Bitmap bmp = new(w, h);
@@ -832,8 +869,8 @@ namespace compareImages
                             if ((float)pictureBox1.Image.Width / pictureBox1.Image.Height == (float)compared.Width / compared.Height)
                             {
                                 byte[,,] comparedBytes = RGBfromBMP(compared);
-                                (float avg, byte max) = compareMinMaxRGB8(originalBytes, comparedBytes);
-                                textBox2.Text += filename + " : AvgError = "+ ((int)(avg*100+0.5f)/100f).ToString() + ", MaxError = " + max.ToString() + "\r\n";
+                                (float avg, float max) = compareAvgMaxRGB8(originalBytes, comparedBytes);
+                                textBox2.Text += filename + " : AvgError = "+ ((int)(avg*100+0.5f)/100f).ToString() + ", MaxError = " + ((int)(max * 100 + 0.5f) / 100f).ToString() + "\r\n";
                                 textBox2.SelectionStart = textBox2.Text.Length;
                                 textBox2.ScrollToCaret();
                                 Application.DoEvents();
@@ -847,34 +884,37 @@ namespace compareImages
             }
         }
 
-        private static (float avg, byte max) compareMinMaxRGB8(byte[,,] original, byte[,,] compared)
+        private static (float avg, float max) compareAvgMaxRGB8(byte[,,] original, byte[,,] compared)
         {
             int w = original.GetLength(0);
             int h = original.GetLength(1);
-
+            float[,,] Floats;
+            byte[,,] Bytes;
             if (w < compared.GetLength(0))
             {
-                compared = ExactMean(compared, compared.GetLength(0), compared.GetLength(1), w, h, (float)compared.GetLength(0) / w);
-            } else if (w > compared.GetLength(0))
+                Floats = ExactMeanFloat(compared, compared.GetLength(0), compared.GetLength(1), w, h, (float)compared.GetLength(0) / w);
+                Bytes = original;
+            } else
             {
-                original = ExactMean(original, w, h, compared.GetLength(0), compared.GetLength(1), (float)w/compared.GetLength(0));
+                Floats = ExactMeanFloat(original, w, h, compared.GetLength(0), compared.GetLength(1), (float)w/compared.GetLength(0));
+                Bytes = compared;
                 w = original.GetLength(0);
                 h = original.GetLength(1);
             }
 
             int sumEr = 0;
-            byte[] maxEr = new byte[h];
-
+            float[] maxEr = new float[h];
+            
             Parallel.For(0, h, y =>
             {
                 maxEr[y] = 0;
                 for (int x = 0; x < w; x++)
                 {
-                    byte er0 = (byte)Math.Abs(original[x, y, 0] - compared[x, y, 0]);
-                    byte er1 = (byte)Math.Abs(original[x, y, 1] - compared[x, y, 1]);
-                    byte er2 = (byte)Math.Abs(original[x, y, 2] - compared[x, y, 2]);
+                    float er0 = Math.Abs(Floats[x, y, 0] - Bytes[x, y, 0]);
+                    float er1 = Math.Abs(Floats[x, y, 1] - Bytes[x, y, 1]);
+                    float er2 = Math.Abs(Floats[x, y, 2] - Bytes[x, y, 2]);
 
-                    Interlocked.Add(ref sumEr, er0 + er1 + er2);
+                    Interlocked.Add(ref sumEr, (int)(er0 + er1 + er2+0.5f));
 
                     if (er0 > maxEr[y]) 
                         maxEr[y] = er0;
