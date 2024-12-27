@@ -69,7 +69,7 @@ namespace compareImages
                             {
                                 byte[,,] comparedBytes = RGBfromBMP(compared);
                                 float MAErgb8 = compareMAErgb8(originalBytes, comparedBytes);
-                                textBox2.Text += filename + " = " + (1 - MAErgb8).ToString() + "\r\n";
+                                textBox2.Text += filename + " : MAE = " + (1 - MAErgb8).ToString() + "\r\n";
                                 textBox2.SelectionStart = textBox2.Text.Length;
                                 textBox2.ScrollToCaret();
                                 Application.DoEvents();
@@ -503,11 +503,11 @@ namespace compareImages
             Parallel.For(0, ho, y =>
             {
                 int ys = (int)(y * decrease + 0.5f);
-                while (ys + decreaseI >= h) ys--;
+                while (ys + decreaseI > h) ys--;
                 for (int x = 0; x < wo; x++)
                 {
                     int xs = (int)(x * decrease + 0.5f);
-                    while (xs + decreaseI >= w) xs--;
+                    while (xs + decreaseI > w) xs--;
                     int red = 0;
                     int green = 0;
                     int blue = 0;
@@ -804,6 +804,93 @@ namespace compareImages
             (float[,,] mpf, float[,,] add) = AdjustCalc(originalBytes, ExactMean(adjustedBytes, w, h, wo, ho, decrease), adjustedBytes, decrease, w, h, wo, ho);
 
             return BMPfromRGB(DoAdjust(adjustedBytes, scaleLanczos250(mpf, wo, ho, decrease), scaleLanczos250(add, wo, ho, decrease), w, h), w, h);
+        }
+
+        private void button13_Click(object sender, EventArgs e) //MinMax
+        {
+            if (pictureBox1.Image == null)
+            {
+                MessageBox.Show("Select original Image!");
+            }
+            else if (textBox1.Text == "")
+            {
+                MessageBox.Show("Select Folder to compare!");
+            }
+            else
+            {
+                Stopwatch stopWatch = new();
+                stopWatch.Start();
+                byte[,,] originalBytes = RGBfromBMP(pictureBox1.Image);
+                string[] allfiles = Directory.GetFiles(textBox1.Text);
+                foreach (string filename in allfiles)
+                {
+                    string ext = filename[^4..];
+                    if (ext.ToLower() == ".png" || ext.ToLower() == ".jpg" || ext.ToLower() == ".gif" || ext.ToLower() == "jpeg" || ext.ToLower() == ".bmp" || ext.ToLower() == ".ico")
+                    {
+                        using (Image compared = Image.FromFile(filename))
+                        {
+                            if ((float)pictureBox1.Image.Width / pictureBox1.Image.Height == (float)compared.Width / compared.Height)
+                            {
+                                byte[,,] comparedBytes = RGBfromBMP(compared);
+                                (float avg, byte max) = compareMinMaxRGB8(originalBytes, comparedBytes);
+                                textBox2.Text += filename + " : AvgError = "+ ((int)(avg*100+0.5f)/100f).ToString() + ", MaxError = " + max.ToString() + "\r\n";
+                                textBox2.SelectionStart = textBox2.Text.Length;
+                                textBox2.ScrollToCaret();
+                                Application.DoEvents();
+                            }
+                        }
+                    }
+                }
+                stopWatch.Stop();
+                TimeSpan ts = stopWatch.Elapsed;
+                MessageBox.Show("All images in folder with same size have been compared to original in " + String.Format("{0:0.000} ", ts.TotalSeconds) + "seconds!");
+            }
+        }
+
+        private static (float avg, byte max) compareMinMaxRGB8(byte[,,] original, byte[,,] compared)
+        {
+            int w = original.GetLength(0);
+            int h = original.GetLength(1);
+
+            if (w < compared.GetLength(0))
+            {
+                compared = ExactMean(compared, compared.GetLength(0), compared.GetLength(1), w, h, (float)compared.GetLength(0) / w);
+            } else if (w > compared.GetLength(0))
+            {
+                original = ExactMean(original, w, h, compared.GetLength(0), compared.GetLength(1), (float)w/compared.GetLength(0));
+                w = original.GetLength(0);
+                h = original.GetLength(1);
+            }
+
+            int sumEr = 0;
+            byte[] maxEr = new byte[h];
+
+            Parallel.For(0, h, y =>
+            {
+                maxEr[y] = 0;
+                for (int x = 0; x < w; x++)
+                {
+                    byte er0 = (byte)Math.Abs(original[x, y, 0] - compared[x, y, 0]);
+                    byte er1 = (byte)Math.Abs(original[x, y, 1] - compared[x, y, 1]);
+                    byte er2 = (byte)Math.Abs(original[x, y, 2] - compared[x, y, 2]);
+
+                    Interlocked.Add(ref sumEr, er0 + er1 + er2);
+
+                    if (er0 > maxEr[y]) 
+                        maxEr[y] = er0;
+                    if (er1 > maxEr[y]) 
+                        maxEr[y] = er1;
+                    if (er2 > maxEr[y]) 
+                        maxEr[y] = er2;
+                }
+            });
+
+            for (int y = 1; y < h; y++)
+            {
+                if (maxEr[y] > maxEr[0]) maxEr[0] = maxEr[y];
+            }
+
+            return ((float)sumEr/h/w/3, maxEr[0]);
         }
     }
 }

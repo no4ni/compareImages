@@ -5,3 +5,9 @@ dotnet_diagnostic.IDE1006.severity = none
 
 # CA1304: Укажите CultureInfo
 dotnet_diagnostic.CA1304.severity = none
+
+# CA1862: Используйте перегрузки метода "StringComparison" для сравнения строк без учета регистра
+dotnet_diagnostic.CA1862.severity = none
+
+# IDE0063: Использовать простой оператор using
+dotnet_diagnostic.IDE0063.severity = none

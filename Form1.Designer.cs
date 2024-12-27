@@ -31,9 +31,10 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             tabControl1 = new TabControl();
             tabPage1 = new TabPage();
+            textBox2 = new TextBox();
+            button13 = new Button();
             button9 = new Button();
             button8 = new Button();
-            textBox2 = new TextBox();
             button3 = new Button();
             textBox1 = new TextBox();
             button2 = new Button();
@@ -70,9 +71,10 @@
             // 
             // tabPage1
             // 
+            tabPage1.Controls.Add(textBox2);
+            tabPage1.Controls.Add(button13);
             tabPage1.Controls.Add(button9);
             tabPage1.Controls.Add(button8);
-            tabPage1.Controls.Add(textBox2);
             tabPage1.Controls.Add(button3);
             tabPage1.Controls.Add(textBox1);
             tabPage1.Controls.Add(button2);
@@ -85,6 +87,28 @@
             tabPage1.TabIndex = 0;
             tabPage1.Text = "Compare";
             tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // textBox2
+            // 
+            textBox2.Dock = DockStyle.Fill;
+            textBox2.Location = new Point(3, 331);
+            textBox2.Multiline = true;
+            textBox2.Name = "textBox2";
+            textBox2.ScrollBars = ScrollBars.Both;
+            textBox2.Size = new Size(786, 88);
+            textBox2.TabIndex = 23;
+            // 
+            // button13
+            // 
+            button13.Dock = DockStyle.Top;
+            button13.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            button13.Location = new Point(3, 299);
+            button13.Name = "button13";
+            button13.Size = new Size(786, 32);
+            button13.TabIndex = 9;
+            button13.Text = "Compare images with same aspect ratio by AvgMax";
+            button13.UseVisualStyleBackColor = true;
+            button13.Click += button13_Click;
             // 
             // button9
             // 
@@ -114,16 +138,6 @@
             button8.Visible = false;
             button8.Click += button8_Click;
             // 
-            // textBox2
-            // 
-            textBox2.Dock = DockStyle.Fill;
-            textBox2.Location = new Point(3, 299);
-            textBox2.Multiline = true;
-            textBox2.Name = "textBox2";
-            textBox2.ScrollBars = ScrollBars.Both;
-            textBox2.Size = new Size(786, 120);
-            textBox2.TabIndex = 6;
-            // 
             // button3
             // 
             button3.Dock = DockStyle.Top;
@@ -132,7 +146,7 @@
             button3.Name = "button3";
             button3.Size = new Size(786, 32);
             button3.TabIndex = 5;
-            button3.Text = "Compare by MAE";
+            button3.Text = "Compare images with same size by MAE";
             button3.UseVisualStyleBackColor = true;
             button3.Click += button3_Click;
             // 
@@ -348,7 +362,6 @@
         private Button button2;
         private TextBox textBox1;
         private Button button3;
-        private TextBox textBox2;
         private PictureBox pictureBox2;
         private TextBox textBox3;
         private Button button5;
@@ -361,5 +374,7 @@
         private Button button11;
         private Button button12;
         private TextBox textBox4;
+        private TextBox textBox2;
+        private Button button13;
     }
 }
