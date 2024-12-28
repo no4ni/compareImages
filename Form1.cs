@@ -898,8 +898,8 @@ namespace compareImages
             {
                 Floats = ExactMeanFloat(original, w, h, compared.GetLength(0), compared.GetLength(1), (float)w/compared.GetLength(0));
                 Bytes = compared;
-                w = original.GetLength(0);
-                h = original.GetLength(1);
+                w = compared.GetLength(0);
+                h = compared.GetLength(1);
             }
 
             int sumEr = 0;
